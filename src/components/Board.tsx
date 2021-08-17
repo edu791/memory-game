@@ -5,6 +5,8 @@ import { InitialValue } from "../initial-values";
 
 export default function Board(props: { initialValues: InitialValue[] }) {
   const [cards, setCards] = useState<CardObject[]>([]);
+  const [isSelecting, setIsSelecting] = useState<boolean>(false);
+  const [gameFinished, setGameFinished] = useState<boolean>(false);
 
   useEffect(() => {
     setCards(
@@ -25,15 +27,26 @@ export default function Board(props: { initialValues: InitialValue[] }) {
     const selectedCards = cards.filter(card => card.isSelected);
     if (selectedCards.length === 2) {
       if (selectedCards[0].groupId === selectedCards[1].groupId) {
-        console.log('MATCH');
-      } else {
-        console.log('DONT MATCH');
+        selectedCards[0].isVisible = true;
+        selectedCards[1].isVisible = true;
       }
-      setCards(cards.map(cards => ({...cards, isSelected: false})));
+      selectedCards[0].isSelected = false;
+      selectedCards[1].isSelected = false;
+      setCards([...cards]);
+      setIsSelecting(false);
     }
   }, [cards]);
 
+  function checkGameFinished() {
+    console.log('checkGameFinished', cards);
+    if (cards.filter(card => card.isVisible).length === cards.length) {
+      console.log('Game Finished!!!!');
+      // setGameFinished(true);
+    }
+  }
+
   function onSelectCardHandler(id: number) {
+    setIsSelecting(true);
     setCards((cards) => {
       return cards.map((card) =>
         card.id === id ? { ...card, isSelected: true } : card
@@ -41,8 +54,13 @@ export default function Board(props: { initialValues: InitialValue[] }) {
     });
   }
 
+  if (!isSelecting) {
+    checkGameFinished();
+  }
+
   return (
     <div>
+      {/* <div>{gameFinished && 'Game Finished!!!!'}</div> */}
       {cards.map((card: CardObject, i: number) => (
         <Card key={i} data={card} onSelect={onSelectCardHandler} />
       ))}

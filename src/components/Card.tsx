@@ -1,13 +1,15 @@
 import { CardObject } from '../types';
 
-export default function Card(props: { data: CardObject, onSelect: any }) {
+export default function Card(props: { data: CardObject, onSelect: (id: number) => void }) {
   function onClickHandler() {
-    props.onSelect(props.data.id);
+    if (!props.data.isSelected && !props.data.isVisible) {
+      props.onSelect(props.data.id);
+    }
   }
 
   return (
     <div onClick={onClickHandler}>
-      {props.data.content} {props.data.isSelected && 'selected'}
+      {props.data.content} {props.data.isVisible && 'visible'} {props.data.isSelected && 'selected'}
     </div>
   );
 }
