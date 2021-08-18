@@ -1,13 +1,21 @@
 import Card from "./Card";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { CardObject } from "../types";
 import { InitialValue } from "../initial-values";
 
 export default function Board(props: { initialValues: InitialValue[] }) {
   const [cards, setCards] = useState<CardObject[]>([]);
   const [isSelecting, setIsSelecting] = useState<boolean>(false);
-  const [gameStarted, setGameStarted] = useState<boolean>(false);
+  const [movementsMade, setMovementsMade] = useState<number>(0);
   const [gameFinished, setGameFinished] = useState<boolean>(false);
+
+  const checkGameFinished = useCallback(() => {
+    console.log('checkGameFinished', cards);
+    if (cards.filter(card => card.isVisible).length === cards.length) {
+      console.log('Game Finished!!!!');
+      setGameFinished(true);
+    }
+  }, [cards]);
 
   useEffect(() => {
     setCards(
@@ -29,6 +37,7 @@ export default function Board(props: { initialValues: InitialValue[] }) {
       console.log('Checking selected cards');
       const selectedCards = cards.filter(card => card.isSelected);
       if (selectedCards.length === 2) {
+        setMovementsMade(previous => previous + 1);
         console.log('Two selected cards');
         if (selectedCards[0].groupId === selectedCards[1].groupId) {
           console.log('Match');
@@ -40,21 +49,12 @@ export default function Board(props: { initialValues: InitialValue[] }) {
         setCards([...cards]);
         setIsSelecting(false);
       }
-    } else if (gameStarted) {
+    } else if (movementsMade > 0) {
       checkGameFinished();
     }
-  }, [isSelecting, cards, gameStarted, checkGameFinished]);
-
-  function checkGameFinished() {
-    console.log('checkGameFinished', cards);
-    if (cards.filter(card => card.isVisible).length === cards.length) {
-      console.log('Game Finished!!!!');
-      setGameFinished(true);
-    }
-  }
+  }, [isSelecting, cards, movementsMade, checkGameFinished]);
 
   function onSelectCardHandler(id: number) {
-    setGameStarted(true);
     setIsSelecting(true);
     setCards((cards) => {
       return cards.map((card) =>
