@@ -9,15 +9,20 @@ export default function Board(props: {
   onFinished: () => void;
 }) {
   const { onMakeMovement, onFinished } = props;
+  const [cards, setCards] = useState<CardObject[]>([]);
+  const [isSelecting, setIsSelecting] = useState<boolean>(false);
   const [data, setData] = useState<{
     cards: CardObject[];
     isSelecting: boolean;
+    isComparing: boolean;
   }>({
     cards: [],
     isSelecting: false,
+    isComparing: false,
   });
 
   useEffect(() => {
+    console.log("Set initial values");
     setData({
       cards: props.initialValues
         .concat(props.initialValues)
@@ -29,6 +34,7 @@ export default function Board(props: {
         }))
         .sort(() => (Math.random() > 0.5 ? 1 : -1)),
       isSelecting: false,
+      isComparing: false,
     });
   }, [props.initialValues]);
 
@@ -44,16 +50,11 @@ export default function Board(props: {
     }
   }, [data, onFinished]);
 
-  function onSelectCardHandler(id: number) {
-    const cards = data.cards.map((card) =>
-      card.id === id ? { ...card, isVisible: true, isSelected: true } : card
-    );
-
-    setData({ cards: cards, isSelecting: true });
-
-    const selectedCards = cards.filter((card) => card.isSelected);
-    if (selectedCards.length === 2) {
-      console.log("Checking selected cards", selectedCards);
+  useEffect(() => {
+    console.log('useEffect comparing');
+    if (data.isComparing) {
+      const selectedCards = data.cards.filter((card) => card.isSelected);
+      console.log("Comparing selected cards", selectedCards);
       onMakeMovement();
       setTimeout(() => {
         if (selectedCards[0].groupId === selectedCards[1].groupId) {
@@ -64,11 +65,20 @@ export default function Board(props: {
           selectedCards[1].isVisible = false;
         }
         setData({
-          cards: cards.map((card) => ({ ...card, isSelected: false })),
+          cards: data.cards.map((card) => ({ ...card, isSelected: false })),
           isSelecting: false,
+          isComparing: false,
         });
       }, 1200);
     }
+  }, [data.isComparing, data.cards, onMakeMovement]);
+
+  function onSelectCardHandler(id: number) {
+    const cards = data.cards.map((card) =>
+      card.id === id ? { ...card, isVisible: true, isSelected: true } : card
+    );
+    const selectedCards = cards.filter((card) => card.isSelected);
+    setData({ cards: cards, isSelecting: true, isComparing: (selectedCards.length === 2) });
   }
 
   console.log("Rendering");
@@ -76,7 +86,7 @@ export default function Board(props: {
   return (
     <div>
       {data.cards.map((card: CardObject, i: number) => (
-        <Card key={i} data={card} onSelect={onSelectCardHandler} />
+        <Card key={i} data={card} onSelect={!data.isComparing ? onSelectCardHandler: () => {}} />
       ))}
     </div>
   );
