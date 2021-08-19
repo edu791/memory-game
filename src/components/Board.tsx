@@ -9,12 +9,17 @@ export default function Board(props: {
   onFinished: () => void;
 }) {
   const { onMakeMovement, onFinished } = props;
-  const [cards, setCards] = useState<CardObject[]>([]);
-  const [isSelecting, setIsSelecting] = useState<boolean>(false);
+  const [data, setData] = useState<{
+    cards: CardObject[];
+    isSelecting: boolean;
+  }>({
+    cards: [],
+    isSelecting: false,
+  });
 
   useEffect(() => {
-    setCards(
-      props.initialValues
+    setData({
+      cards: props.initialValues
         .concat(props.initialValues)
         .map((value) => ({
           ...value,
@@ -22,18 +27,35 @@ export default function Board(props: {
           isVisible: false,
           isSelected: false,
         }))
-        .sort(() => (Math.random() > 0.5 ? 1 : -1))
-    );
+        .sort(() => (Math.random() > 0.5 ? 1 : -1)),
+      isSelecting: false,
+    });
   }, [props.initialValues]);
 
   useEffect(() => {
-    console.log("Changed cards");
-    if (isSelecting) {
-      console.log("Checking selected cards");
-      const selectedCards = cards.filter((card) => card.isSelected);
-      if (selectedCards.length === 2) {
-        onMakeMovement();
-        console.log("Two selected cards");
+    if (!data.isSelecting) {
+      console.log("Checking if finished");
+      if (
+        data.cards.length > 0 &&
+        data.cards.filter((card) => card.isVisible).length === data.cards.length
+      ) {
+        onFinished();
+      }
+    }
+  }, [data, onFinished]);
+
+  function onSelectCardHandler(id: number) {
+    const cards = data.cards.map((card) =>
+      card.id === id ? { ...card, isVisible: true, isSelected: true } : card
+    );
+
+    setData({ cards: cards, isSelecting: true });
+
+    const selectedCards = cards.filter((card) => card.isSelected);
+    if (selectedCards.length === 2) {
+      console.log("Checking selected cards", selectedCards);
+      onMakeMovement();
+      setTimeout(() => {
         if (selectedCards[0].groupId === selectedCards[1].groupId) {
           console.log("Match");
         } else {
@@ -41,34 +63,19 @@ export default function Board(props: {
           selectedCards[0].isVisible = false;
           selectedCards[1].isVisible = false;
         }
-        console.log("before setTimeout");
-        setTimeout(() => {
-          console.log("after setTimeout");
-          setCards(cards.map((card) => ({ ...card, isSelected: false })));
-          setIsSelecting(false);
-        }, 1200);
-      }
-    } else {
-      if (cards.length > 0 && cards.filter((card) => card.isVisible).length === cards.length) {
-        onFinished();
-      }
+        setData({
+          cards: cards.map((card) => ({ ...card, isSelected: false })),
+          isSelecting: false,
+        });
+      }, 1200);
     }
-  }, [isSelecting, cards, onMakeMovement, onFinished]);
-
-  function onSelectCardHandler(id: number) {
-    setIsSelecting(true);
-    setCards((cards) => {
-      return cards.map((card) =>
-        card.id === id ? { ...card, isVisible: true, isSelected: true } : card
-      );
-    });
   }
 
   console.log("Rendering");
 
   return (
     <div>
-      {cards.map((card: CardObject, i: number) => (
+      {data.cards.map((card: CardObject, i: number) => (
         <Card key={i} data={card} onSelect={onSelectCardHandler} />
       ))}
     </div>
