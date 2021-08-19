@@ -1,4 +1,5 @@
 import { CardObject } from '../types';
+import styles from './Card.module.css';
 
 export default function Card(props: { data: CardObject, onSelect: (id: number) => void }) {
   function onClickHandler() {
@@ -8,8 +9,9 @@ export default function Card(props: { data: CardObject, onSelect: (id: number) =
   }
 
   return (
-    <div onClick={onClickHandler}>
-      {props.data.content} {props.data.isVisible && 'visible'} {props.data.isSelected && 'selected'}
+    <div className={styles.card} onClick={onClickHandler}>
+      {props.data.isVisible && props.data.content}
+      {props.data.isVisible && 'visible'} {props.data.isSelected && 'selected'}
     </div>
   );
 }
