@@ -8,10 +8,19 @@ export default function Card(props: { data: CardObject, onSelect: (id: number) =
     }
   }
 
+  console.log(props.data.matchResult);
+  let matchResult = null;
+  if (props.data.matchResult === 'success') {
+    matchResult = styles['match-success'];
+  } else if (props.data.matchResult === 'failed') {
+    matchResult = styles['match-failed'];
+  }
+
+  // console.log('matchResult', matchResult);
+
   return (
-    <div className={styles.card} onClick={onClickHandler}>
+    <div className={`${styles.card} ${matchResult}`} onClick={onClickHandler}>
       {props.data.isVisible && props.data.content}
-      {props.data.isVisible && 'visible'} {props.data.isSelected && 'selected'}
     </div>
   );
 }

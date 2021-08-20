@@ -1,3 +1,4 @@
+import styles from "./Board.module.css";
 import Card from "./Card";
 import { useState, useEffect } from "react";
 import { CardObject } from "../types";
@@ -23,6 +24,7 @@ export default function Board(props: {
           id: Math.round(Math.random() * 1000000),
           isVisible: false,
           isSelected: false,
+          matchResult: null,
         }))
         .sort(() => (Math.random() > 0.5 ? 1 : -1))
     );
@@ -33,16 +35,22 @@ export default function Board(props: {
       const selectedCards = cards.filter((card) => card.isSelected);
       if (selectedCards.length >= 2) {
         console.log("Comparing selected cards", selectedCards);
-        onMakeMovement();
+        if (selectedCards[0].groupId === selectedCards[1].groupId) {
+          console.log("Match");
+          selectedCards[0].matchResult = 'success';
+          selectedCards[1].matchResult = 'success';
+        } else {
+          console.log("Don't match");
+          selectedCards[0].isVisible = false;
+          selectedCards[1].isVisible = false;
+          selectedCards[0].matchResult = 'failed';
+          selectedCards[1].matchResult = 'failed';
+        }
+        setCards([...cards]);
+
         setTimeout(() => {
-          if (selectedCards[0].groupId === selectedCards[1].groupId) {
-            console.log("Match");
-          } else {
-            console.log("Don't match");
-            selectedCards[0].isVisible = false;
-            selectedCards[1].isVisible = false;
-          }
-          setCards(cards.map((card) => ({ ...card, isSelected: false })));
+          onMakeMovement();
+          setCards(cards.map((card) => ({ ...card, isSelected: false, matchResult: null })));
           setIsSelecting(false);
           setIsComparing(false);
         }, 1200);
@@ -73,7 +81,7 @@ export default function Board(props: {
   console.log("Rendering");
 
   return (
-    <div>
+    <div className={styles.cards}>
       {cards.map((card: CardObject, i: number) => (
         <Card
           key={i}

@@ -1,4 +1,18 @@
 .card {
-  border: 1px solid black;
-  height: 80px;
+  background: aliceblue;
+  height: 200px;
+  width: 200px;
+  font-size: 10rem;
+  margin: 0 auto;
+  text-align: center;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+.card.match-success {
+  background-color: green;
+}
+
+.card.match-failed {
+  background-color: red;
 }

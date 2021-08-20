@@ -4,4 +4,5 @@ export type CardObject = {
   content: string;
   isVisible: boolean;
   isSelected: boolean;
+  matchResult: string | null;
 };
