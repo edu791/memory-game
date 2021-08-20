@@ -9,8 +9,6 @@ export default function Board(props: {
   onFinished: () => void;
 }) {
   const { onMakeMovement, onFinished } = props;
-  const [cards, setCards] = useState<CardObject[]>([]);
-  const [isSelecting, setIsSelecting] = useState<boolean>(false);
   const [data, setData] = useState<{
     cards: CardObject[];
     isSelecting: boolean;
@@ -39,19 +37,6 @@ export default function Board(props: {
   }, [props.initialValues]);
 
   useEffect(() => {
-    if (!data.isSelecting) {
-      console.log("Checking if finished");
-      if (
-        data.cards.length > 0 &&
-        data.cards.filter((card) => card.isVisible).length === data.cards.length
-      ) {
-        onFinished();
-      }
-    }
-  }, [data, onFinished]);
-
-  useEffect(() => {
-    console.log('useEffect comparing');
     if (data.isComparing) {
       const selectedCards = data.cards.filter((card) => card.isSelected);
       console.log("Comparing selected cards", selectedCards);
@@ -71,14 +56,28 @@ export default function Board(props: {
         });
       }, 1200);
     }
-  }, [data.isComparing, data.cards, onMakeMovement]);
+
+    if (!data.isSelecting) {
+      console.log("Checking if finished");
+      if (
+        data.cards.length > 0 &&
+        data.cards.filter((card) => card.isVisible).length === data.cards.length
+      ) {
+        onFinished();
+      }
+    }
+  }, [data, onMakeMovement, onFinished]);
 
   function onSelectCardHandler(id: number) {
     const cards = data.cards.map((card) =>
       card.id === id ? { ...card, isVisible: true, isSelected: true } : card
     );
     const selectedCards = cards.filter((card) => card.isSelected);
-    setData({ cards: cards, isSelecting: true, isComparing: (selectedCards.length === 2) });
+    setData({
+      cards: cards,
+      isSelecting: true,
+      isComparing: selectedCards.length === 2,
+    });
   }
 
   console.log("Rendering");
@@ -86,7 +85,11 @@ export default function Board(props: {
   return (
     <div>
       {data.cards.map((card: CardObject, i: number) => (
-        <Card key={i} data={card} onSelect={!data.isComparing ? onSelectCardHandler: () => {}} />
+        <Card
+          key={i}
+          data={card}
+          onSelect={!data.isComparing ? onSelectCardHandler : () => {}}
+        />
       ))}
     </div>
   );
