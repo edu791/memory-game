@@ -1,8 +1,114 @@
 import styles from "./Board.module.css";
 import Card from "./Card";
-import { useState, useEffect } from "react";
+import { useEffect, useReducer } from "react";
 import { CardObject } from "../types";
 import { InitialValue } from "../initial-values";
+
+type BoardState = {
+  cards: CardObject[];
+  isSelecting: boolean;
+  isComparing: boolean;
+};
+
+enum ActionType {
+  SetInitialValues,
+  SelectCard,
+  CompareCards,
+  ClearSelection,
+}
+
+type SetInitialValues = {
+  type: ActionType.SetInitialValues;
+  payload: InitialValue[];
+};
+
+type SelectCard = {
+  type: ActionType.SelectCard;
+  payload: { id: number };
+};
+
+type CompareCards = {
+  type: ActionType.CompareCards;
+};
+
+type ClearSelection = {
+  type: ActionType.ClearSelection;
+};
+
+type ReducerActions =
+  | SetInitialValues
+  | SelectCard
+  | CompareCards
+  | ClearSelection;
+
+function reducer(state: BoardState, action: ReducerActions): BoardState {
+  switch (action.type) {
+    case ActionType.SetInitialValues: {
+      console.log("Set initial values");
+      return {
+        cards: action.payload
+          .concat(action.payload)
+          .map((value) => ({
+            ...value,
+            id: Math.round(Math.random() * 1000000),
+            isSelected: false,
+            isMatched: false,
+            matchResult: null,
+          }))
+          .sort(() => (Math.random() > 0.5 ? 1 : -1)),
+        isSelecting: false,
+        isComparing: false,
+      };
+    }
+    case ActionType.SelectCard: {
+      console.log("Select card");
+      const updatedCards = state.cards.map((card) =>
+        card.id === action.payload.id ? { ...card, isSelected: true } : card
+      );
+      const selectedCards = updatedCards.filter((card) => card.isSelected);
+      return {
+        cards: updatedCards,
+        isSelecting: true,
+        isComparing: selectedCards.length === 2,
+      };
+    }
+    case ActionType.CompareCards: {
+      const selectedCards = state.cards.filter((card) => card.isSelected);
+      console.log("Comparing selected cards", selectedCards);
+      if (selectedCards[0].groupId === selectedCards[1].groupId) {
+        console.log("Match");
+        selectedCards[0].isMatched = true;
+        selectedCards[0].matchResult = "success";
+        selectedCards[1].isMatched = true;
+        selectedCards[1].matchResult = "success";
+      } else {
+        console.log("Don't match");
+        selectedCards[0].matchResult = "failed";
+        selectedCards[1].matchResult = "failed";
+      }
+
+      return {
+        cards: state.cards,
+        isSelecting: true,
+        isComparing: true,
+      };
+    }
+    case ActionType.ClearSelection: {
+      console.log("Clear selection");
+      return {
+        cards: state.cards.map((card) => ({
+          ...card,
+          isSelected: false,
+          matchResult: null,
+        })),
+        isSelecting: false,
+        isComparing: false,
+      };
+    }
+    default:
+      return state;
+  }
+}
 
 export default function Board(props: {
   initialValues: InitialValue[];
@@ -10,83 +116,53 @@ export default function Board(props: {
   onFinished: () => void;
 }) {
   const { onMakeMovement, onFinished } = props;
-  const [cards, setCards] = useState<CardObject[]>([]);
-  const [isSelecting, setIsSelecting] = useState<boolean>(false);
-  const [isComparing, setIsComparing] = useState<boolean>(false);
+  const [state, dispatch] = useReducer(reducer, {
+    cards: [],
+    isSelecting: false,
+    isComparing: false,
+  });
 
   useEffect(() => {
-    console.log("Set initial values");
-    setCards(
-      props.initialValues
-        .concat(props.initialValues)
-        .map((value) => ({
-          ...value,
-          id: Math.round(Math.random() * 1000000),
-          isVisible: false,
-          isSelected: false,
-          matchResult: null,
-        }))
-        .sort(() => (Math.random() > 0.5 ? 1 : -1))
-    );
+    dispatch({
+      type: ActionType.SetInitialValues,
+      payload: props.initialValues,
+    });
   }, [props.initialValues]);
 
   useEffect(() => {
-    if (isComparing) {
-      const selectedCards = cards.filter((card) => card.isSelected);
-      if (selectedCards.length >= 2) {
-        console.log("Comparing selected cards", selectedCards);
-        if (selectedCards[0].groupId === selectedCards[1].groupId) {
-          console.log("Match");
-          selectedCards[0].matchResult = 'success';
-          selectedCards[1].matchResult = 'success';
-        } else {
-          console.log("Don't match");
-          selectedCards[0].isVisible = false;
-          selectedCards[1].isVisible = false;
-          selectedCards[0].matchResult = 'failed';
-          selectedCards[1].matchResult = 'failed';
-        }
-        setCards([...cards]);
-
-        setTimeout(() => {
-          onMakeMovement();
-          setCards(cards.map((card) => ({ ...card, isSelected: false, matchResult: null })));
-          setIsSelecting(false);
-          setIsComparing(false);
-        }, 1200);
-      }
+    if (state.isComparing) {
+      dispatch({ type: ActionType.CompareCards });
+      setTimeout(() => {
+        dispatch({ type: ActionType.ClearSelection });
+      }, 1200);
+      onMakeMovement();
     }
+  }, [state.isComparing, onMakeMovement]);
 
-    if (!isSelecting) {
+  useEffect(() => {
+    if (!state.isSelecting) {
       console.log("Checking if finished");
       if (
-        cards.length > 0 &&
-        cards.filter((card) => card.isVisible).length === cards.length
+        state.cards.length > 0 &&
+        state.cards.filter((card) => card.isMatched).length === state.cards.length
       ) {
+        console.log("Game finished");
         onFinished();
       }
     }
-  }, [isComparing, isSelecting, cards, onMakeMovement, onFinished]);
+  }, [state.isSelecting, state.cards, onFinished]);
 
   function onSelectCardHandler(id: number) {
-    const updatedCards = cards.map((card) =>
-      card.id === id ? { ...card, isVisible: true, isSelected: true } : card
-    );
-    const selectedCards = updatedCards.filter((card) => card.isSelected);
-    setCards(updatedCards);
-    setIsSelecting(true);
-    setIsComparing(selectedCards.length === 2);
+    dispatch({ type: ActionType.SelectCard, payload: { id } });
   }
-
-  console.log("Rendering");
 
   return (
     <div className={styles.cards}>
-      {cards.map((card: CardObject, i: number) => (
+      {state.cards.map((card: CardObject, i: number) => (
         <Card
           key={i}
           data={card}
-          onSelect={!isComparing ? onSelectCardHandler : () => {}}
+          onSelect={!state.isComparing ? onSelectCardHandler : () => {}}
         />
       ))}
     </div>

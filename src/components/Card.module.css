@@ -10,9 +10,11 @@
 }
 
 .card.match-success {
-  background-color: green;
+  background-color: rgb(46, 156, 46);
+  transition: 500ms;
 }
 
 .card.match-failed {
-  background-color: red;
+  background-color: rgb(201, 71, 71);
+  transition: 500ms;
 }
