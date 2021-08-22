@@ -1,7 +1,10 @@
-import { CardObject } from '../types';
-import styles from './Card.module.css';
+import { CardObject } from "../types";
+import styles from "./Card.module.css";
 
-export default function Card(props: { data: CardObject, onSelect: (id: number) => void }) {
+export default function Card(props: {
+  data: CardObject;
+  onSelect: (id: number) => void;
+}) {
   function onClickHandler() {
     if (!props.data.isSelected) {
       props.onSelect(props.data.id);
@@ -9,10 +12,10 @@ export default function Card(props: { data: CardObject, onSelect: (id: number) =
   }
 
   let matchResult = null;
-  if (props.data.matchResult === 'success') {
-    matchResult = styles['match-success'];
-  } else if (props.data.matchResult === 'failed') {
-    matchResult = styles['match-failed'];
+  if (props.data.matchResult === "success") {
+    matchResult = styles["match-success"];
+  } else if (props.data.matchResult === "failed") {
+    matchResult = styles["match-failed"];
   }
 
   return (
