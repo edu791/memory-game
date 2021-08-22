@@ -1,6 +1,6 @@
-export type InitialValue = { groupId: number, content: string };
+export type CardValue = { groupId: number, content: string };
 
-export const initialValues: InitialValue[] = [
+export const cardValues: CardValue[] = [
   {groupId: 1, content: "😉"},
   {groupId: 2, content: "😘"},
   {groupId: 3, content: "😱"},

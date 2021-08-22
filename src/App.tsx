@@ -1,5 +1,4 @@
 import Game from './components/Game';
-import { initialValues } from "./initial-values";
 import "./index.css";
 
 export default function App() {
@@ -12,7 +11,7 @@ export default function App() {
       <title>Document</title>
     </head>
     <body>
-        <Game initialValues={initialValues} />
+        <Game />
     </body>
     </html>
   );

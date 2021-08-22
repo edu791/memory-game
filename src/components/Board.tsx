@@ -2,7 +2,6 @@ import styles from "./Board.module.css";
 import Card from "./Card";
 import { useEffect, useReducer } from "react";
 import { CardObject } from "../types";
-import { InitialValue } from "../initial-values";
 
 type BoardState = {
   cards: CardObject[];
@@ -11,16 +10,10 @@ type BoardState = {
 };
 
 enum ActionType {
-  SetInitialValues,
   SelectCard,
   CompareCards,
   ClearSelection,
 }
-
-type SetInitialValues = {
-  type: ActionType.SetInitialValues;
-  payload: InitialValue[];
-};
 
 type SelectCard = {
   type: ActionType.SelectCard;
@@ -36,30 +29,12 @@ type ClearSelection = {
 };
 
 type ReducerActions =
-  | SetInitialValues
   | SelectCard
   | CompareCards
   | ClearSelection;
 
 function reducer(state: BoardState, action: ReducerActions): BoardState {
   switch (action.type) {
-    case ActionType.SetInitialValues: {
-      console.log("Set initial values");
-      return {
-        cards: action.payload
-          .concat(action.payload)
-          .map((value) => ({
-            ...value,
-            id: Math.round(Math.random() * 1000000),
-            isSelected: false,
-            isMatched: false,
-            matchResult: null,
-          }))
-          .sort(() => (Math.random() > 0.5 ? 1 : -1)),
-        isSelecting: false,
-        isComparing: false,
-      };
-    }
     case ActionType.SelectCard: {
       console.log("Select card");
       const updatedCards = state.cards.map((card) =>
@@ -111,23 +86,16 @@ function reducer(state: BoardState, action: ReducerActions): BoardState {
 }
 
 export default function Board(props: {
-  initialValues: InitialValue[];
+  initialValues: CardObject[];
   onMakeMovement: () => void;
   onFinished: () => void;
 }) {
   const { onMakeMovement, onFinished } = props;
   const [state, dispatch] = useReducer(reducer, {
-    cards: [],
+    cards: props.initialValues,
     isSelecting: false,
     isComparing: false,
   });
-
-  useEffect(() => {
-    dispatch({
-      type: ActionType.SetInitialValues,
-      payload: props.initialValues,
-    });
-  }, [props.initialValues]);
 
   useEffect(() => {
     if (state.isComparing) {
