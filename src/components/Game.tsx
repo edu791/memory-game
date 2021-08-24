@@ -1,3 +1,4 @@
+import styles from "./Game.module.css";
 import { useCallback, useState } from "react";
 import { cardValues, CardValue } from "../card-values";
 import Board from "./Board";
@@ -38,10 +39,17 @@ export default function Game() {
   console.log("render Game");
 
   return (
-    <div>
-      <div>Movements: {movementsMade}</div>
-      <div>
-        <button onClick={clickRestartButtonHandler}>Restart game</button>
+    <div className={styles.game}>
+      <div className={styles["game-controls"]}>
+        <div className={styles["movements-counter"]}>Movements: {movementsMade}</div>
+        <div className={styles["restart-game"]}>
+          <button
+            className={styles["restart-game__button"]}
+            onClick={clickRestartButtonHandler}
+          >
+            Reset
+          </button>
+        </div>
       </div>
       <Board
         initialValues={initialValues}
