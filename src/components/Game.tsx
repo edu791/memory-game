@@ -33,7 +33,15 @@ export default function Game() {
   }, []);
 
   if (gameFinished) {
-    return <div>Game Finished!!!!</div>;
+    return (
+      <div className={styles["game-finished"]}>
+        <div className={styles["game-finished__title"]}>
+          Game Finished!!!!
+        </div>
+        <div className={styles["game-finished__movements-made"]}>You made {movementsMade} movements</div>
+        <button className={styles["game-finished__btn-new-game"]} onClick={clickRestartButtonHandler}>New game</button>
+      </div>
+    );
   }
 
   console.log("render Game");
@@ -41,7 +49,9 @@ export default function Game() {
   return (
     <div className={styles.game}>
       <div className={styles["game-controls"]}>
-        <div className={styles["movements-counter"]}>Movements: {movementsMade}</div>
+        <div className={styles["movements-counter"]}>
+          Movements: {movementsMade}
+        </div>
         <div className={styles["restart-game"]}>
           <button
             className={styles["restart-game__button"]}

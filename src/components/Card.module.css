@@ -9,6 +9,30 @@
   cursor: pointer;
 }
 
+@media (min-width: 375px) {
+  .card {
+    height: 3.8rem;
+    width: 3.8rem;
+    font-size: 3rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .card {
+    height: 6rem;
+    width: 6rem;
+    font-size: 5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .card {
+    height: 7rem;
+    width: 7rem;
+    font-size: 6rem;
+  }
+}
+
 .card.match-success {
   background-color: rgb(46, 156, 46);
   transition: 500ms;
