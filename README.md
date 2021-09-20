@@ -1,8 +1,10 @@
-# Getting Started with Create React App
+# Memory game buit on React.js
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Play online here: https://edu791.github.io/memory-game/
 
-## Available Scripts
+![Screen Shot 2021-09-20 at 00 33 46](https://user-images.githubusercontent.com/1775903/133954771-b587bf94-fa60-4dd7-bc60-edc7976bb216.png)
+![Screen Shot 2021-09-20 at 00 33 05](https://user-images.githubusercontent.com/1775903/133954767-6e847ca0-e00c-4266-a05a-47564eb4eefc.png)
+
 
 In the project directory, you can run:
 
